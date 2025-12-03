@@ -4,7 +4,7 @@ import {
   Plus, Minus, Settings, Users, Upload, Download, 
   Trophy, Sprout, Search, X, FileSpreadsheet, 
   Trash2, UserPlus, Save, RefreshCw, Grid, Layers, Armchair, 
-  Calendar, Globe, Palette, Dice5, Edit3, List, MoreVertical
+  Calendar, Dice5, Edit3
 } from 'lucide-react';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid 
