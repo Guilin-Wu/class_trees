@@ -10,11 +10,11 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid 
 } from 'recharts';
 
-import TreeVisual from './components/TreeVisual';
+import TreeVisual from './components/TreeVisual.tsx';
 import { 
   Student, TreeType, TreeStage, AppConfig, 
   DEFAULT_THRESHOLDS, LogEntry, ViewMode, Holiday 
-} from './types';
+} from './types.ts';
 
 // --- Constants & Config ---
 const TRANSLATIONS = {

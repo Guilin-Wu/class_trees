@@ -37,8 +37,12 @@
   }
 }
 </script>
+<!-- Load Babel to handle TSX in the browser -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
   <body>
     <div id="root"></div>
+    <!-- Entry point using Babel to compile TSX on the fly -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
   </body>
 </html>

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { TreeType, TreeStage, TreeStyle, Holiday } from '../types';
+import { TreeType, TreeStage, TreeStyle, Holiday } from '../types.ts';
 
 interface TreeVisualProps {
   type: TreeType;
