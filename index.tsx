@@ -10,7 +10,9 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, CartesianGrid 
 } from 'recharts';
 
-// --- TYPES & CONSTANTS ---
+// ==========================================
+// SECTION 1: TYPES & CONSTANTS
+// ==========================================
 
 export enum TreeType {
   OAK = 'Oak',
@@ -71,7 +73,9 @@ export const DEFAULT_THRESHOLDS = {
   [TreeStage.BLOOMING]: 150,
 };
 
-// --- COMPONENT: TreeVisual ---
+// ==========================================
+// SECTION 2: COMPONENTS (TreeVisual)
+// ==========================================
 
 interface TreeVisualProps {
   type: TreeType;
@@ -412,7 +416,9 @@ const TreeVisual: React.FC<TreeVisualProps> = ({ type, stage, style, holiday = '
   );
 };
 
-// --- APP COMPONENT ---
+// ==========================================
+// SECTION 3: APP COMPONENT
+// ==========================================
 
 const TRANSLATIONS = {
   en: {
@@ -1084,7 +1090,7 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2"><div className="bg-emerald-100 p-2 rounded-lg"><Sprout className="w-6 h-6 text-emerald-600" /></div><h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-teal-500 hidden md:block">{t.appTitle}</h1></div>
           <div className="flex items-center gap-4 flex-1 max-w-2xl mx-4 lg:mx-8">
-            <div className="relative flex-1 group"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-emerald-500" /><input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-gray-100 border-transparent focus:bg-white border focus:border-emerald-300 rounded-full py-2 pl-10 pr-4 text-sm transition-all outline-none" /></div>
+            <div className="relative flex-1 group"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" /><input type="text" placeholder={t.searchPlaceholder} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-gray-100 border-transparent focus:bg-white border focus:border-emerald-300 rounded-full py-2 pl-10 pr-4 text-sm transition-all outline-none" /></div>
             <div className="hidden sm:flex bg-gray-100 rounded-lg p-1">
                  <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow text-emerald-600' : 'text-gray-400'}`} title={t.grid}><Grid className="w-4 h-4" /></button>
                  <button onClick={() => setViewMode('forest')} className={`p-2 rounded-md transition-all ${viewMode === 'forest' ? 'bg-white shadow text-emerald-600' : 'text-gray-400'}`} title={t.forests}><Layers className="w-4 h-4" /></button>
@@ -1122,6 +1128,10 @@ function App() {
     </div>
   );
 }
+
+// ==========================================
+// SECTION 4: MOUNTING
+// ==========================================
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error("Could not find root element to mount to");
