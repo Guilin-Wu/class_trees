@@ -320,7 +320,7 @@ function generateTreeSVG(type, stage, style = 'flat', decorations = []) {
         });
     }
 
-return `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md" shape-rendering="${shapeRendering}">
+    return `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md" shape-rendering="${shapeRendering}">
                 ${filters}
                 <ellipse cx="100" cy="190" rx="60" ry="10" fill="rgba(0,0,0,0.15)" />
                 ${groundEffect}
@@ -373,12 +373,12 @@ const app = {
 
     // --- 👇👇👇 插入这段缺失的核心代码 👇👇👇 ---
 
-    save: function() {
+    save: function () {
         localStorage.setItem('classTree_students', JSON.stringify(state.students));
         localStorage.setItem('classTree_config', JSON.stringify(state.config));
     },
 
-    updateViewToggles: function(activeBtn) {
+    updateViewToggles: function (activeBtn) {
         document.querySelectorAll('#view-toggles button').forEach(btn => {
             if (btn === activeBtn) {
                 btn.classList.add('bg-white', 'shadow', 'text-emerald-600');
@@ -390,12 +390,12 @@ const app = {
         });
     },
 
-    renderHeader: function() {
+    renderHeader: function () {
         // 更新标题语言
         document.getElementById('app-title').textContent = t('appTitle');
         document.getElementById('search-input').placeholder = t('searchPlaceholder');
         document.getElementById('lbl-manage').textContent = t('manage');
-        
+
         // 更新统计数据
         // const totalScore = state.students.reduce((acc, s) => acc + s.score, 0);
         // document.getElementById('stats-total').textContent = totalScore; 
@@ -403,14 +403,14 @@ const app = {
     },
 
     // 核心渲染引擎 (已升级：支持分组视图)
-    renderGrid: function() {
+    renderGrid: function () {
         const container = document.getElementById('main-container');
         // 重置容器样式
         container.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-4rem)]';
-        
+
         // 1. 过滤学生 (搜索功能)
         let filtered = state.students.filter(s => s.name.toLowerCase().includes(state.searchQuery.toLowerCase()));
-        
+
         // 如果没学生，显示空状态
         if (filtered.length === 0) {
             container.innerHTML = `<div class="text-center text-gray-400 py-20 flex flex-col items-center"><i data-lucide="sprout" class="w-12 h-12 mb-4 opacity-50"></i><p>${t('noStudents')}</p></div>`;
@@ -433,7 +433,7 @@ const app = {
             const html = Object.keys(groups).sort().map(groupName => {
                 const students = groups[groupName];
                 const cards = students.map(s => this.createStudentCard(s)).join('');
-                
+
                 return `
                     <div class="mb-10 animate-slide-up">
                         <div class="flex items-center gap-3 mb-4 border-b border-gray-100 pb-2">
@@ -449,8 +449,8 @@ const app = {
             }).join('');
 
             container.innerHTML = html;
-        } 
-        
+        }
+
         // --- 模式 B: 标准网格 & 座位表 (Grid / Seats) ---
         else {
             // 座位模式排序
@@ -459,11 +459,11 @@ const app = {
             }
 
             const html = filtered.map(student => this.createStudentCard(student)).join('');
-            
+
             // 设置网格列数
             let gridClass = 'grid gap-6 ';
             if (state.viewMode === 'grid') gridClass += 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
-            else if (state.viewMode === 'seats') gridClass += 'grid-cols-6 gap-4'; 
+            else if (state.viewMode === 'seats') gridClass += 'grid-cols-6 gap-4';
 
             container.innerHTML = `<div class="${gridClass}">${html}</div>`;
         }
@@ -471,7 +471,7 @@ const app = {
         lucide.createIcons();
     },
 
-    createStudentCard: function(student) {
+    createStudentCard: function (student) {
         const stage = getStage(student.score);
         const isSelected = state.selectedIds.has(student.id);
         const svg = generateTreeSVG(student.treeType, stage, state.config.treeStyle, student.decorations);
@@ -501,7 +501,7 @@ const app = {
         `;
     },
 
-    toggleSelection: function(id, event) {
+    toggleSelection: function (id, event) {
         // 如果按住 Ctrl/Cmd 键，进行多选；否则单选
         // 移动端体验优化：始终允许点击切换选中状态，不需要按键
         if (state.selectedIds.has(id)) {
@@ -512,23 +512,23 @@ const app = {
             // 如果为了配合商店单选：
             state.selectedIds.add(id);
         }
-        
+
         // 简单的单选逻辑（为了配合商店）：
         // 如果没有按 Ctrl，就清除其他的
         if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
-             // 这里我们可以做一个优化：如果点击的是已经选中的，就取消；
-             // 如果点击未选中的，且当前已经有选中的，就变成只选中这一个
-             const wasSelected = state.selectedIds.has(id);
-             state.selectedIds.clear();
-             if (!wasSelected) state.selectedIds.add(id);
-             else state.selectedIds.add(id); // 保持选中
+            // 这里我们可以做一个优化：如果点击的是已经选中的，就取消；
+            // 如果点击未选中的，且当前已经有选中的，就变成只选中这一个
+            const wasSelected = state.selectedIds.has(id);
+            state.selectedIds.clear();
+            if (!wasSelected) state.selectedIds.add(id);
+            else state.selectedIds.add(id); // 保持选中
         }
 
         this.renderGrid();
         this.updateBatchBar();
     },
     // --- 找回的批量操作逻辑 ---
-    updateBatchBar: function() {
+    updateBatchBar: function () {
         const bar = document.getElementById('batch-bar');
         const count = document.getElementById('batch-count');
         if (state.selectedIds.size > 0) {
@@ -541,20 +541,20 @@ const app = {
         }
     },
 
-    clearSelection: function() {
+    clearSelection: function () {
         state.selectedIds.clear();
         this.renderGrid();
         this.updateBatchBar();
     },
 
-    batchScore: function(delta) {
+    batchScore: function (delta) {
         if (state.selectedIds.size === 0) return;
         const ids = [...state.selectedIds];
         this.applyScore(ids, delta, 'Batch Operation');
         this.clearSelection();
     },
 
-    batchCustomScore: function() {
+    batchCustomScore: function () {
         const val = parseInt(document.getElementById('batch-custom-score').value);
         if (!isNaN(val) && val !== 0) {
             this.batchScore(val);
@@ -562,17 +562,17 @@ const app = {
         }
     },
 
-    openStudentDetail: function(id) {
+    openStudentDetail: function (id) {
         const student = state.students.find(s => s.id === id);
         if (!student) return;
-        
+
         const stage = getStage(student.score);
-        
+
         // 1. 生成树木 SVG (包含挂件参数 decorations)
         const svg = generateTreeSVG(student.treeType, stage, state.config.treeStyle, student.decorations);
-        
+
         // 生成切换树种的按钮
-        const displayTreeType = Object.values(TreeTypes).map(type => 
+        const displayTreeType = Object.values(TreeTypes).map(type =>
             `<button onclick="app.changeTreeType('${id}', '${type}')" class="px-2 py-1 text-xs border rounded hover:bg-emerald-50 ${student.treeType === type ? 'bg-emerald-100 border-emerald-500' : ''}">${type}</button>`
         ).join('');
 
@@ -584,10 +584,10 @@ const app = {
             const b = ACHIEVEMENTS[bid];
             if (!b) return '';
             // 检查 lucide 图标是否存在，不存在则显示默认 emoji
-            const iconContent = (window.lucide && window.lucide.icons && window.lucide.icons[b.icon]) 
-                ? `<i data-lucide="${b.icon}" class="w-4 h-4"></i>` 
+            const iconContent = (window.lucide && window.lucide.icons && window.lucide.icons[b.icon])
+                ? `<i data-lucide="${b.icon}" class="w-4 h-4"></i>`
                 : '🏅';
-                
+
             return `<div class="tooltip cursor-help transition-transform hover:scale-110" title="${b.desc}">
                         <div class="w-8 h-8 rounded-full bg-white border-2 flex items-center justify-center shadow-sm" style="border-color:${b.color}; color:${b.color}">
                             ${iconContent}
@@ -595,13 +595,17 @@ const app = {
                     </div>`;
         }).join('');
 
-        // 生成历史记录 HTML
-        const historyHtml = student.history.slice(0, 5).map(h => `
-            <div class="flex justify-between text-sm py-2 border-b">
-                <span>${h.reason}</span>
-                <span class="${h.scoreDelta > 0 ? 'text-emerald-600' : 'text-red-500'} font-bold">${h.scoreDelta > 0 ? '+' : ''}${h.scoreDelta}</span>
-            </div>
-        `).join('');
+        
+        // 👇 改成 50，或者直接去掉 .slice() 显示全部
+const historyHtml = student.history.slice(0, 50).map(h => `
+    <div class="flex justify-between text-sm py-2 border-b border-gray-100 last:border-0">
+        <span class="text-gray-600">${h.reason}</span>
+        <span class="${h.scoreDelta > 0 ? 'text-emerald-600' : 'text-red-500'} font-bold font-mono">
+            ${h.scoreDelta > 0 ? '+' : ''}${h.scoreDelta}
+        </span>
+    </div>
+`).join('');
+
 
         // 组装完整弹窗 HTML
         const html = `
@@ -680,7 +684,7 @@ const app = {
         }
     },
 
-// --- 修复：身份码弹窗 (彻底关闭逻辑) ---
+    // --- 修复：身份码弹窗 (彻底关闭逻辑) ---
     showQR: function (id) {
         const student = state.students.find(s => s.id === id);
         // 生成二维码数据
@@ -703,7 +707,7 @@ const app = {
                 </div>
              </div>
         `;
-        
+
         // 创建临时容器并追加到 body
         const div = document.createElement('div');
         div.innerHTML = html;
@@ -728,8 +732,10 @@ const app = {
         const student = state.students.find(s => s.id === studentId);
         
         const itemsHtml = SHOP_ITEMS.map(item => {
-            // 计算当前拥有的数量
             const ownCount = student.decorations ? student.decorations.filter(id => id === item.id).length : 0;
+            
+            // 🟢 关键修改：使用 getItemPrice 获取动态价格
+            const currentPrice = this.getItemPrice(item.id); 
             
             return `
                 <div class="border rounded-xl p-4 flex flex-col items-center gap-2 bg-white hover:border-emerald-400 transition-all">
@@ -738,8 +744,10 @@ const app = {
                         ${ownCount > 0 ? `<span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-bold">${ownCount}</span>` : ''}
                     </div>
                     <div class="font-bold text-gray-700 text-sm">${item.name}</div>
-                    <div class="text-emerald-600 font-bold text-xs">${item.price} pts</div>
-                    <button onclick="app.buyItem('${student.id}', '${item.id}', ${item.price})" 
+                    
+                    <div class="text-emerald-600 font-bold text-xs">${currentPrice} pts</div>
+                    
+                    <button onclick="app.buyItem('${student.id}', '${item.id}', ${currentPrice})" 
                         class="w-full py-1.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors">
                         兑换
                     </button>
@@ -769,21 +777,65 @@ const app = {
 
     buyItem: function (studentId, itemId, price) {
         const student = state.students.find(s => s.id === studentId);
+
+        // 1. 余额检查
         if (student.score < price) {
             alert(t('insufficient'));
             return;
         }
-        if (!confirm(`花费 ${price} 分兑换? (Spend ${price}?)`)) return;
 
-        // Transaction
+        // 2. 扣费与添加挂件
+        // 移除 confirm 确认框，让购买体验更流畅（或者保留看您喜好，这里我去掉了以便快速购买）
         student.score -= price;
         if (!student.decorations) student.decorations = [];
         student.decorations.push(itemId);
-        student.history.unshift({ id: generateId(), timestamp: Date.now(), scoreDelta: -price, reason: `Shop: ${itemId}` });
 
+        // 记录消费历史
+        student.history.unshift({
+            id: generateId(),
+            timestamp: Date.now(),
+            scoreDelta: -price,
+            reason: `Shop: ${SHOP_ITEMS.find(i => i.id === itemId)?.name || itemId}`
+        });
+
+        // 3. 保存数据
         this.save();
-        this.openShop(); // refresh UI
+
+        // 🟢 核心修复：立刻刷新背后的主网格，这样就能看到树上多出了挂件！
+        this.renderGrid();
+
+        // 4. 刷新商店界面（更新右上角的拥有数量）
+        this.openShop();
     },
+
+
+    // --- 👇👇👇 新增：商店价格管理函数 👇👇👇 ---
+    
+    // 获取商品价格 (优先读取自定义设置)
+    getItemPrice: function(id) {
+        // 确保配置对象存在
+        if (!state.config.shopPrices) state.config.shopPrices = {};
+        
+        // 如果有自定义价格，就用自定义的；否则用默认的
+        if (state.config.shopPrices[id] !== undefined) {
+            return parseInt(state.config.shopPrices[id]);
+        }
+        
+        const item = SHOP_ITEMS.find(i => i.id === id);
+        return item ? item.price : 999;
+    },
+
+    // 更新商品价格
+    updateShopPrice: function(id, newPrice) {
+        if (!state.config.shopPrices) state.config.shopPrices = {};
+        state.config.shopPrices[id] = parseInt(newPrice);
+        this.save();
+        // 如果商店开着，刷新商店
+        if (document.querySelector('#modal-container h2')?.textContent.includes(t('shopTitle'))) {
+            this.openShop();
+        }
+    },
+    // --- 👆👆👆 新增结束 👆👆👆 ---
 
     // --- Daily Summary (Enhanced) ---
     openDailySummary: function () {
@@ -880,6 +932,47 @@ const app = {
         if (earned.length > 0) {
             alert(`🎉 恭喜 ${student.name} 解锁成就：\n${earned.map(e => `${e.icon} ${e.name}`).join('\n')}`);
             this.save();
+        }
+    },
+
+    // --- 🟢 修复版：支持详情页实时刷新 ---
+    applyScore: function(ids, delta, reason) {
+        const now = Date.now();
+        state.students = state.students.map(s => {
+            if (ids.includes(s.id)) {
+                // 1. 更新数据
+                const updatedStudent = {
+                    ...s,
+                    score: s.score + delta,
+                    history: [{ id: generateId(), timestamp: now, scoreDelta: delta, reason }, ...s.history]
+                };
+                
+                // 2. 检查成就
+                if (this.checkAchievements) {
+                    this.checkAchievements(updatedStudent); 
+                }
+
+                return updatedStudent;
+            }
+            return s;
+        });
+        
+        this.save();
+        this.renderGrid(); // 刷新主背景
+
+        // --- 👇 核心修复逻辑 👇 ---
+        // 检测：如果当前正在给某位同学加分，且他的详情页正好开着，就刷新详情页
+        if (ids.length === 1) {
+            // 这是一个简单的检测方法：看当前页面上有没有这个学生的详情卡片
+            // 我们通过重新调用 openStudentDetail 来实现"无感刷新"
+            // 为了防止死循环或错误，我们只在 id 匹配时刷新
+            const modalTitle = document.querySelector('#modal-container h2'); // 获取弹窗标题(通常是学生名字)
+            const targetStudent = state.students.find(s => s.id === ids[0]);
+            
+            // 如果弹窗开着，且名字对应，就强制刷新
+            if (modalTitle && targetStudent && modalTitle.textContent === targetStudent.name) {
+                this.openStudentDetail(ids[0]);
+            }
         }
     },
 
@@ -1003,7 +1096,7 @@ const app = {
             `).join('');
 
 
-            
+
 
             return `
                 <div class="space-y-4 animate-fade-in h-full overflow-y-auto custom-scrollbar pr-2">
@@ -1037,6 +1130,31 @@ const app = {
                             </div>
                         </div>
                     </section>
+
+                
+                    <details class="group border rounded-lg bg-amber-50/50 border-amber-100 open:bg-amber-50 transition-colors">
+                        <summary class="list-none p-3 cursor-pointer flex items-center justify-between font-bold text-amber-800 text-sm">
+                            <span class="flex items-center gap-2"><i data-lucide="tag" class="w-4 h-4"></i> 商店价格设置 (Shop Prices)</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-3 pt-0 grid grid-cols-2 gap-2">
+                            ${SHOP_ITEMS.map(item => `
+                                <div class="flex items-center gap-2 bg-white p-2 rounded border border-amber-100">
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px]" style="background:${item.color}">
+                                        <i data-lucide="${item.icon}" class="w-3 h-3"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="text-[10px] text-gray-500 truncate">${item.name}</div>
+                                        <input type="number" value="${app.getItemPrice(item.id)}" 
+                                            onchange="app.updateShopPrice('${item.id}', this.value)"
+                                            class="w-full text-xs font-bold text-amber-600 border-b border-transparent focus:border-amber-400 outline-none bg-transparent p-0">
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </details>
+
+
 
                     <div class="flex gap-2 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 mt-2">
                         <input type="text" id="add-name" placeholder="新学生姓名" class="flex-1 p-2 border rounded-lg text-sm outline-none focus:border-emerald-500 bg-white">
@@ -1423,7 +1541,7 @@ const app = {
         }
     },
 
-    openLeaderboard: function() {
+    openLeaderboard: function () {
         // 1. 计算小组数据
         const groupStats = {};
         state.students.forEach(s => {
@@ -1432,17 +1550,17 @@ const app = {
             groupStats[g].total += s.score;
             groupStats[g].count++;
         });
-        const groups = Object.values(groupStats).sort((a,b) => (b.total/b.count) - (a.total/a.count));
+        const groups = Object.values(groupStats).sort((a, b) => (b.total / b.count) - (a.total / a.count));
 
         // 2. 生成小组榜 HTML
         const groupHtml = groups.map((g, i) => {
             const avg = g.count > 0 ? (g.total / g.count).toFixed(1) : 0;
-            const width = Math.min(100, (avg / 20) * 100); 
+            const width = Math.min(100, (avg / 20) * 100);
             return `
                 <div class="mb-4">
                     <div class="flex justify-between items-end mb-1">
                         <span class="font-bold text-gray-700 flex items-center gap-2">
-                            <span class="text-xs bg-gray-200 px-1.5 rounded text-gray-500">#${i+1}</span> ${g.name}
+                            <span class="text-xs bg-gray-200 px-1.5 rounded text-gray-500">#${i + 1}</span> ${g.name}
                         </span>
                         <div class="text-right">
                             <span class="text-2xl font-black text-indigo-600 italic font-mono">${avg}</span>
@@ -1457,11 +1575,11 @@ const app = {
         }).join('');
 
         // 3. 生成个人榜 HTML
-        const sorted = [...state.students].sort((a,b) => b.score - a.score).slice(0, 5);
-        const topStudentHtml = sorted.map((s,i) => `
+        const sorted = [...state.students].sort((a, b) => b.score - a.score).slice(0, 5);
+        const topStudentHtml = sorted.map((s, i) => `
              <div class="flex justify-between items-center py-3 border-b border-dashed border-gray-200 last:border-0 hover:bg-gray-50 px-2 rounded transition-colors">
                 <span class="flex items-center gap-2">
-                    <span class="w-6 h-6 flex items-center justify-center rounded-full ${i===0?'bg-yellow-100 text-yellow-600':(i===1?'bg-gray-100 text-gray-600':'bg-orange-50 text-orange-600')} text-xs font-bold">#${i+1}</span>
+                    <span class="w-6 h-6 flex items-center justify-center rounded-full ${i === 0 ? 'bg-yellow-100 text-yellow-600' : (i === 1 ? 'bg-gray-100 text-gray-600' : 'bg-orange-50 text-orange-600')} text-xs font-bold">#${i + 1}</span>
                     <span class="font-bold text-gray-700">${s.name}</span>
                 </span>
                 <span class="font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">${s.score}</span>
