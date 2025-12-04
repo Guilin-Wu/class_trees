@@ -402,38 +402,72 @@ const app = {
         // (如果有统计显示的话)
     },
 
-    // 核心渲染引擎
+    // 核心渲染引擎 (已升级：支持分组视图)
     renderGrid: function() {
         const container = document.getElementById('main-container');
+        // 重置容器样式
         container.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-4rem)]';
         
-        // 过滤与排序
+        // 1. 过滤学生 (搜索功能)
         let filtered = state.students.filter(s => s.name.toLowerCase().includes(state.searchQuery.toLowerCase()));
         
-        // 视图切换逻辑
-        if (state.viewMode === 'seats') {
-            filtered.sort((a, b) => (a.seatIndex || 0) - (b.seatIndex || 0));
-        } else {
-            // 默认按学号或添加顺序
-            // filtered.sort((a,b) => ...); 
-        }
-
+        // 如果没学生，显示空状态
         if (filtered.length === 0) {
             container.innerHTML = `<div class="text-center text-gray-400 py-20 flex flex-col items-center"><i data-lucide="sprout" class="w-12 h-12 mb-4 opacity-50"></i><p>${t('noStudents')}</p></div>`;
             lucide.createIcons();
             return;
         }
 
-        // 生成卡片 HTML
-        const html = filtered.map(student => this.createStudentCard(student)).join('');
+        // --- 模式 A: 分组视图 (Forest Mode / Group View) ---
+        // 逻辑：先按组分类，再渲染一个个"版块"
+        if (state.viewMode === 'forest') {
+            const groups = {};
+            // 分类
+            filtered.forEach(s => {
+                const g = s.group || '未分组 (Unassigned)';
+                if (!groups[g]) groups[g] = [];
+                groups[g].push(s);
+            });
 
-        // 设置网格布局
-        let gridClass = 'grid gap-6 ';
-        if (state.viewMode === 'grid') gridClass += 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
-        else if (state.viewMode === 'forest') gridClass += 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8';
-        else if (state.viewMode === 'seats') gridClass += 'grid-cols-6 gap-4'; // 座位表模式更紧凑
+            // 生成 HTML (每个组一个 block)
+            const html = Object.keys(groups).sort().map(groupName => {
+                const students = groups[groupName];
+                const cards = students.map(s => this.createStudentCard(s)).join('');
+                
+                return `
+                    <div class="mb-10 animate-slide-up">
+                        <div class="flex items-center gap-3 mb-4 border-b border-gray-100 pb-2">
+                            <div class="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
+                            <h3 class="text-lg font-bold text-gray-700">${groupName}</h3>
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full font-bold">${students.length}</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                            ${cards}
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
-        container.innerHTML = `<div class="${gridClass}">${html}</div>`;
+            container.innerHTML = html;
+        } 
+        
+        // --- 模式 B: 标准网格 & 座位表 (Grid / Seats) ---
+        else {
+            // 座位模式排序
+            if (state.viewMode === 'seats') {
+                filtered.sort((a, b) => (a.seatIndex || 0) - (b.seatIndex || 0));
+            }
+
+            const html = filtered.map(student => this.createStudentCard(student)).join('');
+            
+            // 设置网格列数
+            let gridClass = 'grid gap-6 ';
+            if (state.viewMode === 'grid') gridClass += 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
+            else if (state.viewMode === 'seats') gridClass += 'grid-cols-6 gap-4'; 
+
+            container.innerHTML = `<div class="${gridClass}">${html}</div>`;
+        }
+
         lucide.createIcons();
     },
 
