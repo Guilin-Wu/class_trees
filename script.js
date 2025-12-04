@@ -131,12 +131,18 @@ function t(key) { return TRANSLATIONS[state.config.language][key] || key; }
 
 function getStage(score) {
     if (score < 0) return TreeStages.WITHERED;
-    if (score >= 150) return TreeStages.BLOOMING;
-    if (score >= 100) return TreeStages.MATURE;
-    if (score >= 60) return TreeStages.TREE;
-    if (score >= 30) return TreeStages.SAPLING;
-    if (score >= 10) return TreeStages.SPROUT;
-    return TreeStages.SEED;
+    
+    // 获取配置中的阈值
+    const th = state.config.thresholds;
+    
+    // 按照分数要求从大到小判断
+    if (score >= th[TreeStages.BLOOMING]) return TreeStages.BLOOMING; // 开花 (最高级)
+    if (score >= th[TreeStages.MATURE]) return TreeStages.MATURE;     // 成熟 (大树)
+    if (score >= th[TreeStages.TREE]) return TreeStages.TREE;         // 小树
+    if (score >= th[TreeStages.SAPLING]) return TreeStages.SAPLING;   // 树苗
+    if (score >= th[TreeStages.SPROUT]) return TreeStages.SPROUT;     // 发芽
+    
+    return TreeStages.SEED; // 种子 (默认)
 }
 
 function getSeasonalHoliday() {
@@ -1154,7 +1160,47 @@ const historyHtml = student.history.slice(0, 50).map(h => `
                         </div>
                     </details>
 
-
+                    <details class="group border rounded-lg bg-emerald-50/50 border-emerald-100 open:bg-emerald-50 transition-colors mt-2">
+                        <summary class="list-none p-3 cursor-pointer flex items-center justify-between font-bold text-emerald-800 text-sm">
+                            <span class="flex items-center gap-2"><i data-lucide="sprout" class="w-4 h-4"></i> 成长阶段设置 (Growth Stages)</span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="p-3 pt-0 text-xs text-emerald-600 mb-2">
+                            * 设置达到该形态所需的最低分。如果想跳过某阶段，可将其分数设为与上一级相同。
+                        </div>
+                        <div class="p-3 pt-0 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            <div class="bg-white p-2 rounded border border-emerald-100">
+                                <label class="block text-[10px] font-bold text-gray-400">1. 发芽 (Sprout)</label>
+                                <input type="number" value="${state.config.thresholds['Sprout']}" 
+                                    onchange="app.updateThreshold('Sprout', this.value)"
+                                    class="w-full font-bold text-emerald-600 border-b border-transparent focus:border-emerald-400 outline-none">
+                            </div>
+                            <div class="bg-white p-2 rounded border border-emerald-100">
+                                <label class="block text-[10px] font-bold text-gray-400">2. 树苗 (Sapling)</label>
+                                <input type="number" value="${state.config.thresholds['Sapling']}" 
+                                    onchange="app.updateThreshold('Sapling', this.value)"
+                                    class="w-full font-bold text-emerald-600 border-b border-transparent focus:border-emerald-400 outline-none">
+                            </div>
+                            <div class="bg-white p-2 rounded border border-emerald-100">
+                                <label class="block text-[10px] font-bold text-gray-400">3. 小树 (Tree)</label>
+                                <input type="number" value="${state.config.thresholds['Tree']}" 
+                                    onchange="app.updateThreshold('Tree', this.value)"
+                                    class="w-full font-bold text-emerald-600 border-b border-transparent focus:border-emerald-400 outline-none">
+                            </div>
+                            <div class="bg-white p-2 rounded border border-emerald-100">
+                                <label class="block text-[10px] font-bold text-gray-400">4. 大树 (Mature)</label>
+                                <input type="number" value="${state.config.thresholds['Mature']}" 
+                                    onchange="app.updateThreshold('Mature', this.value)"
+                                    class="w-full font-bold text-emerald-600 border-b border-transparent focus:border-emerald-400 outline-none">
+                            </div>
+                            <div class="bg-white p-2 rounded border border-emerald-100">
+                                <label class="block text-[10px] font-bold text-gray-400">5. 开花 (Blooming)</label>
+                                <input type="number" value="${state.config.thresholds['Blooming']}" 
+                                    onchange="app.updateThreshold('Blooming', this.value)"
+                                    class="w-full font-bold text-pink-500 border-b border-transparent focus:border-pink-400 outline-none">
+                            </div>
+                        </div>
+                    </details>        
 
                     <div class="flex gap-2 p-4 bg-emerald-50/50 rounded-xl border border-emerald-100 mt-2">
                         <input type="text" id="add-name" placeholder="新学生姓名" class="flex-1 p-2 border rounded-lg text-sm outline-none focus:border-emerald-500 bg-white">
@@ -1438,6 +1484,17 @@ const historyHtml = student.history.slice(0, 50).map(h => `
         this.openManagerModal(); // 重新打开模态框以刷新模态框内的语言
         this.renderGrid(); // 刷新主网格
     },
+
+    // --- 🟢 新增：更新成长阶段阈值 ---
+    updateThreshold: function(stageKey, value) {
+        const val = parseInt(value);
+        if (isNaN(val)) return;
+        
+        state.config.thresholds[stageKey] = val;
+        this.save();
+        this.renderGrid(); // 刷新网格，让变化立刻生效
+        // 保持输入框焦点不用刷新面板，体验更好
+    }, 
 
     addStudent: function () {
         const nameEl = document.getElementById('new-name');
