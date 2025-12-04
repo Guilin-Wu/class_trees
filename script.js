@@ -89,8 +89,20 @@ const SHOP_ITEMS = [
     { id: 'sword', name: '勇者之剑', price: 45, icon: 'sword', color: '#94a3b8' },
     { id: 'shield', name: '守护盾牌', price: 45, icon: 'shield', color: '#ef4444' },
     { id: 'potion', name: '能量药水', price: 25, icon: 'flask-conical', color: '#10b981' },
-    { id: 'glasses', name: '酷酷墨镜', price: 30, icon: 'glasses', color: '#111827' }
+    { id: 'glasses', name: '酷酷墨镜', price: 30, icon: 'glasses', color: '#111827' },
+
+    { id: 'formula_e', name: '能量方程', price: 80, icon: 'zap', color: '#8b5cf6', isText: 'E=mc²' },
+    { id: 'formula_f', name: '牛顿第二定律', price: 70, icon: 'move', color: '#3b82f6', isText: 'F=ma' },
+    { id: 'magnet', name: '磁感线', price: 50, icon: 'magnet', color: '#ef4444' },
+    { id: 'pulley', name: '定滑轮', price: 40, icon: 'circle-dot', color: '#64748b' }
+
 ];
+
+const ACHIEVEMENTS = {
+    'trophy': { id: 'trophy', icon: 'trophy', name: '百里挑一', desc: '积分突破 100 分', color: '#f59e0b' },
+    'fire': { id: 'fire', icon: 'flame', name: '热火朝天', desc: '连续 3 天有加分', color: '#ef4444' },
+    'shield': { id: 'shield', icon: 'shield-check', name: '全勤卫士', desc: '累计活跃天数达 5 天', color: '#10b981' }
+};
 
 // --- State Management ---
 
@@ -260,6 +272,7 @@ function generateTreeSVG(type, stage, style = 'flat', decorations = []) {
             const transform = `translate(${100 + finalOx}, ${190 + finalOy}) scale(${itemScale})`;
             let path = '';
 
+
             // 绘制挂件图形
             if (itemId === 'star') path = `<path d="M0,-10 L2,-3 L9,-3 L3,1 L5,8 L0,4 L-5,8 L-3,1 L-9,-3 L-2,-3 Z" fill="${item.color}" stroke="white" stroke-width="1"/>`;
             else if (itemId === 'lantern') path = `<g><line x1="0" y1="-10" x2="0" y2="0" stroke="#fca5a5" /><rect x="-6" y="0" width="12" height="14" rx="2" fill="${item.color}" /><line x1="0" y1="14" x2="0" y2="20" stroke="${item.color}" /></g>`;
@@ -295,15 +308,23 @@ function generateTreeSVG(type, stage, style = 'flat', decorations = []) {
                 path = `<g><circle cx="-5" cy="0" r="4" fill="${item.color}"/><circle cx="5" cy="0" r="4" fill="${item.color}"/><line x1="-1" y1="0" x2="1" y2="0" stroke="${item.color}" stroke-width="1"/></g>`;
             }
 
+            if (item.isText) {
+                path = `<text x="0" y="5" text-anchor="middle" fill="${item.color}" font-size="10" font-weight="bold" font-family="serif" style="text-shadow: 0 1px 2px white;">${item.isText}</text>`;
+            }
+
+            else if (itemId === 'magnet') path = `<path d="M-6,-8 Q0,-15 6,-8 L6,0 Q6,3 3,3 L3,-8 Q0,-10 -3,-8 L-3,3 Q-3,3 -6,0 Z" fill="none" stroke="${item.color}" stroke-width="3"/><rect x="-6" y="0" width="3" height="4" fill="${item.color}"/><rect x="3" y="0" width="3" height="4" fill="${item.color}"/>`;
+            else if (itemId === 'pulley') path = `<circle cx="0" cy="0" r="6" stroke="#475569" stroke-width="2" fill="none"/><circle cx="0" cy="0" r="2" fill="#475569"/><line x1="-6" y1="0" x2="-6" y2="20" stroke="#cbd5e1"/><line x1="6" y1="0" x2="6" y2="20" stroke="#cbd5e1"/>`;
+
+
             decorSVG += `<g transform="${transform}">${path}</g>`;
         });
     }
 
-    return `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md" shape-rendering="${shapeRendering}">
+return `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-md" shape-rendering="${shapeRendering}">
                 ${filters}
                 <ellipse cx="100" cy="190" rx="60" ry="10" fill="rgba(0,0,0,0.15)" />
                 ${groundEffect}
-                <g transform="translate(100, 190) scale(${scale}) translate(-100, -190)">
+                <g class="tree-shaker" transform="translate(100, 190) scale(${scale}) translate(-100, -190)">
                     ${shape}
                     ${decorSVG}
                 </g>
@@ -350,191 +371,263 @@ const app = {
         lucide.createIcons();
     },
 
-    save: function () {
+    // --- 👇👇👇 插入这段缺失的核心代码 👇👇👇 ---
+
+    save: function() {
         localStorage.setItem('classTree_students', JSON.stringify(state.students));
         localStorage.setItem('classTree_config', JSON.stringify(state.config));
-        this.renderGrid();
     },
 
-    updateViewToggles: function (activeBtn) {
-        document.querySelectorAll('#view-toggles button').forEach(b => {
-            b.classList.remove('bg-white', 'shadow', 'text-emerald-600');
-            b.classList.add('text-gray-400');
+    updateViewToggles: function(activeBtn) {
+        document.querySelectorAll('#view-toggles button').forEach(btn => {
+            if (btn === activeBtn) {
+                btn.classList.add('bg-white', 'shadow', 'text-emerald-600');
+                btn.classList.remove('text-gray-400');
+            } else {
+                btn.classList.remove('bg-white', 'shadow', 'text-emerald-600');
+                btn.classList.add('text-gray-400');
+            }
         });
-        activeBtn.classList.add('bg-white', 'shadow', 'text-emerald-600');
-        activeBtn.classList.remove('text-gray-400');
     },
 
-    renderHeader: function () {
+    renderHeader: function() {
+        // 更新标题语言
         document.getElementById('app-title').textContent = t('appTitle');
         document.getElementById('search-input').placeholder = t('searchPlaceholder');
         document.getElementById('lbl-manage').textContent = t('manage');
-        document.getElementById('lbl-selected').textContent = t('selected');
-        document.getElementById('lbl-clear').textContent = t('clear');
+        
+        // 更新统计数据
+        // const totalScore = state.students.reduce((acc, s) => acc + s.score, 0);
+        // document.getElementById('stats-total').textContent = totalScore; 
+        // (如果有统计显示的话)
     },
 
-    renderGrid: function () {
+    // 核心渲染引擎
+    renderGrid: function() {
         const container = document.getElementById('main-container');
-        container.innerHTML = '';
-        const filtered = state.students.filter(s => s.name.toLowerCase().includes(state.searchQuery.toLowerCase()));
+        container.className = 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-4rem)]';
+        
+        // 过滤与排序
+        let filtered = state.students.filter(s => s.name.toLowerCase().includes(state.searchQuery.toLowerCase()));
+        
+        // 视图切换逻辑
+        if (state.viewMode === 'seats') {
+            filtered.sort((a, b) => (a.seatIndex || 0) - (b.seatIndex || 0));
+        } else {
+            // 默认按学号或添加顺序
+            // filtered.sort((a,b) => ...); 
+        }
 
         if (filtered.length === 0) {
-            container.innerHTML = `<div class="text-center py-24 text-gray-400"><p>未找到学生</p></div>`;
+            container.innerHTML = `<div class="text-center text-gray-400 py-20 flex flex-col items-center"><i data-lucide="sprout" class="w-12 h-12 mb-4 opacity-50"></i><p>${t('noStudents')}</p></div>`;
+            lucide.createIcons();
             return;
         }
 
-        if (state.viewMode === 'forest') {
-            // Group Forest View - Separate into 4 quadrants/zones if groups match
-            const groups = {};
-            filtered.forEach(s => {
-                const g = s.group || 'Default';
-                if (!groups[g]) groups[g] = [];
-                groups[g].push(s);
-            });
+        // 生成卡片 HTML
+        const html = filtered.map(student => this.createStudentCard(student)).join('');
 
-            let html = '<div class="grid grid-cols-1 md:grid-cols-2 gap-8">';
-            Object.entries(groups).forEach(([name, students], idx) => {
-                const bgColors = ['bg-emerald-50', 'bg-teal-50', 'bg-green-50', 'bg-lime-50'];
-                const bg = bgColors[idx % 4];
-                html += `
-                    <div class="${bg} rounded-3xl p-6 border border-emerald-100 shadow-inner min-h-[300px]">
-                        <h3 class="font-bold text-emerald-800 mb-4 flex items-center gap-2">
-                             <i data-lucide="trees" class="w-5 h-5"></i> ${name} Forest
-                        </h3>
-                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                            ${students.map(s => this.createStudentCard(s)).join('')}
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
+        // 设置网格布局
+        let gridClass = 'grid gap-6 ';
+        if (state.viewMode === 'grid') gridClass += 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5';
+        else if (state.viewMode === 'forest') gridClass += 'grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8';
+        else if (state.viewMode === 'seats') gridClass += 'grid-cols-6 gap-4'; // 座位表模式更紧凑
 
-        } else if (state.viewMode === 'seats') {
-            // Seat Map View
-            container.innerHTML = `
-                <div class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm overflow-x-auto">
-                     <div class="text-center mb-8 border-b pb-2"><span class="bg-gray-800 text-white px-8 py-1 rounded text-sm">讲台 (Podium)</span></div>
-                     <div class="grid grid-cols-6 gap-6 min-w-[800px] justify-items-center">
-                         ${filtered.map(s => this.createSeatCard(s)).join('')}
-                     </div>
-                </div>`;
-        } else {
-            // Grid
-            container.innerHTML = `<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                ${filtered.map(s => this.createStudentCard(s)).join('')}
-            </div>`;
-        }
-
+        container.innerHTML = `<div class="${gridClass}">${html}</div>`;
         lucide.createIcons();
-        this.updateBatchBar();
     },
 
-    createSeatCard: function (student) {
+    createStudentCard: function(student) {
         const stage = getStage(student.score);
+        const isSelected = state.selectedIds.has(student.id);
+        const svg = generateTreeSVG(student.treeType, stage, state.config.treeStyle, student.decorations);
+        const badgeIcon = (student.badges && student.badges.length > 0) ? `<div class="absolute -top-2 -right-2 bg-amber-400 text-white w-6 h-6 rounded-full flex items-center justify-center shadow-sm text-xs border-2 border-white" title="Has Badges">🏆</div>` : '';
+        const borderClass = isSelected ? 'ring-4 ring-emerald-400 ring-offset-2 transform scale-95' : 'hover:scale-105 hover:shadow-xl';
+
+        // 👇👇👇 注意下面的 ondblclick 和 toggleSelection 调用 👇👇👇
         return `
-            <div onclick="app.openStudentDetail('${student.id}')" 
-                 class="w-24 h-24 bg-orange-50 border-2 border-orange-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-orange-100 transition-colors relative shadow-sm hover:shadow-md">
-                <span class="text-xs text-orange-300 font-bold absolute top-1 left-1">Seat</span>
-                <div class="w-8 h-8 mb-1">${generateTreeSVG(student.treeType, stage, 'flat', student.decorations)}</div>
-                <div class="font-bold text-gray-700 text-sm truncate w-full text-center px-1">${student.name}</div>
-                <div class="text-[10px] text-emerald-600 font-bold">${student.score}</div>
+            <div onclick="app.toggleSelection('${student.id}', event)" 
+                 ondblclick="app.openStudentDetail('${student.id}')"
+                 class="student-card relative bg-white rounded-2xl p-4 shadow-sm border border-gray-100 transition-all duration-300 cursor-pointer select-none group ${borderClass}">
+                ${badgeIcon}
+                <div class="tree-container w-full aspect-[4/5] flex items-end justify-center mb-2 ${state.config.gravityMode ? 'gravity-mode' : ''}">
+                    ${svg}
+                </div>
+                <div class="text-center relative z-10">
+                    <h3 class="font-bold text-gray-800 truncate px-1">${student.name}</h3>
+                    <div class="flex items-center justify-center gap-1 text-xs font-bold mt-1 text-emerald-600 bg-emerald-50 py-0.5 px-2 rounded-full mx-auto w-fit">
+                        ${student.score} <span class="scale-75 opacity-70">${t('points')}</span>
+                    </div>
+                </div>
+                <button onclick="event.stopPropagation(); app.openStudentDetail('${student.id}')" 
+                    class="absolute top-2 right-2 p-1.5 text-gray-300 hover:text-emerald-600 hover:bg-emerald-50 rounded-full opacity-0 group-hover:opacity-100 transition-all">
+                    <i data-lucide="maximize-2" class="w-4 h-4"></i>
+                </button>
             </div>
         `;
     },
 
+    toggleSelection: function(id, event) {
+        // 如果按住 Ctrl/Cmd 键，进行多选；否则单选
+        // 移动端体验优化：始终允许点击切换选中状态，不需要按键
+        if (state.selectedIds.has(id)) {
+            state.selectedIds.delete(id);
+        } else {
+            // 如果想做成"点击即单选，长按多选"，逻辑会复杂。
+            // 简单逻辑：点击就选中/取消选中。
+            // 如果为了配合商店单选：
+            state.selectedIds.add(id);
+        }
+        
+        // 简单的单选逻辑（为了配合商店）：
+        // 如果没有按 Ctrl，就清除其他的
+        if (!event.ctrlKey && !event.metaKey && !event.shiftKey) {
+             // 这里我们可以做一个优化：如果点击的是已经选中的，就取消；
+             // 如果点击未选中的，且当前已经有选中的，就变成只选中这一个
+             const wasSelected = state.selectedIds.has(id);
+             state.selectedIds.clear();
+             if (!wasSelected) state.selectedIds.add(id);
+             else state.selectedIds.add(id); // 保持选中
+        }
 
-    toggleSelection: function (id) {
-        if (state.selectedIds.has(id)) state.selectedIds.delete(id);
-        else state.selectedIds.add(id);
         this.renderGrid();
+        this.updateBatchBar();
     },
-
-    clearSelection: function () { state.selectedIds.clear(); this.renderGrid(); },
-
-    updateBatchBar: function () {
+    // --- 找回的批量操作逻辑 ---
+    updateBatchBar: function() {
         const bar = document.getElementById('batch-bar');
         const count = document.getElementById('batch-count');
         if (state.selectedIds.size > 0) {
             bar.classList.remove('hidden', 'opacity-0');
+            bar.classList.add('flex', 'opacity-100');
             count.textContent = state.selectedIds.size;
         } else {
-            bar.classList.add('opacity-0');
-            setTimeout(() => bar.classList.add('hidden'), 300);
+            bar.classList.add('hidden', 'opacity-0');
+            bar.classList.remove('flex', 'opacity-100');
         }
     },
 
-    batchScore: function (delta) {
+    clearSelection: function() {
+        state.selectedIds.clear();
+        this.renderGrid();
+        this.updateBatchBar();
+    },
+
+    batchScore: function(delta) {
         if (state.selectedIds.size === 0) return;
-        this.applyScore([...state.selectedIds], delta, "Batch Action");
+        const ids = [...state.selectedIds];
+        this.applyScore(ids, delta, 'Batch Operation');
         this.clearSelection();
     },
 
-    batchCustomScore: function () {
+    batchCustomScore: function() {
         const val = parseInt(document.getElementById('batch-custom-score').value);
-        if (!isNaN(val) && val !== 0) this.batchScore(val);
+        if (!isNaN(val) && val !== 0) {
+            this.batchScore(val);
+            document.getElementById('batch-custom-score').value = '';
+        }
     },
 
-    applyScore: function (ids, delta, reason) {
-        const now = Date.now();
-        state.students = state.students.map(s => {
-            if (ids.includes(s.id)) {
-                return {
-                    ...s,
-                    score: s.score + delta,
-                    history: [{ id: generateId(), timestamp: now, scoreDelta: delta, reason }, ...s.history]
-                };
-            }
-            return s;
-        });
-        this.save();
-    },
-
-    // --- Detail Modal with Custom Input & QR ---
-    openStudentDetail: function (id) {
+    openStudentDetail: function(id) {
         const student = state.students.find(s => s.id === id);
         if (!student) return;
+        
         const stage = getStage(student.score);
+        
+        // 1. 生成树木 SVG (包含挂件参数 decorations)
         const svg = generateTreeSVG(student.treeType, stage, state.config.treeStyle, student.decorations);
+        
+        // 生成切换树种的按钮
+        const displayTreeType = Object.values(TreeTypes).map(type => 
+            `<button onclick="app.changeTreeType('${id}', '${type}')" class="px-2 py-1 text-xs border rounded hover:bg-emerald-50 ${student.treeType === type ? 'bg-emerald-100 border-emerald-500' : ''}">${type}</button>`
+        ).join('');
+
+        // 2. 生成成长轨迹图表 SVG
+        const chartSvg = this.generateGrowthChart(student);
+
+        // 3. 生成成就勋章 HTML
+        const badgesHtml = (student.badges || []).map(bid => {
+            const b = ACHIEVEMENTS[bid];
+            if (!b) return '';
+            // 检查 lucide 图标是否存在，不存在则显示默认 emoji
+            const iconContent = (window.lucide && window.lucide.icons && window.lucide.icons[b.icon]) 
+                ? `<i data-lucide="${b.icon}" class="w-4 h-4"></i>` 
+                : '🏅';
+                
+            return `<div class="tooltip cursor-help transition-transform hover:scale-110" title="${b.desc}">
+                        <div class="w-8 h-8 rounded-full bg-white border-2 flex items-center justify-center shadow-sm" style="border-color:${b.color}; color:${b.color}">
+                            ${iconContent}
+                        </div>
+                    </div>`;
+        }).join('');
+
+        // 生成历史记录 HTML
+        const historyHtml = student.history.slice(0, 5).map(h => `
+            <div class="flex justify-between text-sm py-2 border-b">
+                <span>${h.reason}</span>
+                <span class="${h.scoreDelta > 0 ? 'text-emerald-600' : 'text-red-500'} font-bold">${h.scoreDelta > 0 ? '+' : ''}${h.scoreDelta}</span>
+            </div>
+        `).join('');
+
+        // 组装完整弹窗 HTML
         const html = `
-            <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onclick="if(event.target === this) app.closeModal()">
-                <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden">
-                    <div class="md:w-1/2 p-8 bg-gradient-to-br from-emerald-50 to-sky-100 relative flex flex-col items-center">
-                        <div class="w-full h-64">${svg}</div>
-                        <h2 class="text-4xl font-black text-gray-800 mt-4">${student.name}</h2>
-                        <div class="mt-2 text-2xl font-bold text-emerald-600">${student.score} pts</div>
+            <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in" onclick="if(event.target === this) app.closeModal()">
+                <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col md:flex-row overflow-hidden animate-zoom-in">
+                    
+                    <div class="md:w-1/2 p-8 flex flex-col items-center justify-center bg-gradient-to-br from-emerald-50 to-sky-100 relative">
+                        <div class="absolute top-4 left-4 flex flex-wrap gap-1 max-w-[200px]">
+                           ${displayTreeType}
+                        </div>
                         
-                        <button onclick="app.showQR('${student.id}')" class="mt-4 flex items-center gap-1 text-xs bg-white/80 px-3 py-1 rounded-full text-gray-600 hover:bg-white shadow-sm">
-                            <i data-lucide="qr-code" class="w-4 h-4"></i> 学生身份码
-                        </button>
+                        <div class="w-64 h-80 drop-shadow-xl mt-8 transition-transform duration-500 ${state.config.gravityMode ? 'gravity-mode' : ''}">
+                            ${svg}
+                        </div>
+                        
+                        <h2 class="text-4xl font-black text-gray-800 mt-4">${student.name}</h2>
+                        <div class="mt-2 text-2xl font-bold text-emerald-600">${student.score} ${t('points')}</div>
+                        <div class="text-sm font-bold text-gray-400 uppercase tracking-widest mt-1">${stage}</div>
+
+                        <div class="flex gap-2 justify-center mt-4 min-h-[40px] flex-wrap px-4">
+                            ${badgesHtml || '<span class="text-xs text-gray-400 opacity-50 py-2">暂无成就勋章</span>'}
+                        </div>
                     </div>
 
-                    <div class="md:w-1/2 bg-white flex flex-col p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-bold text-gray-500 uppercase">Control</h3>
-                            <button onclick="app.closeModal()"><i data-lucide="x" class="w-6 h-6"></i></button>
+                    <div class="md:w-1/2 bg-white flex flex-col">
+                        <div class="p-4 border-b flex justify-between items-center">
+                            <h3 class="font-bold text-gray-500 uppercase tracking-widest text-sm">Control Panel</h3>
+                            <button onclick="app.closeModal()" class="p-2 hover:bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
                         </div>
                         
-                        <div class="grid grid-cols-4 gap-2 mb-4">
-                            <button onclick="app.applyScore(['${id}'], 1, '表现好')" class="p-2 border rounded hover:bg-emerald-50 text-emerald-700 font-bold">+1</button>
-                            <button onclick="app.applyScore(['${id}'], 5, '大进步')" class="p-2 border rounded hover:bg-emerald-50 text-emerald-700 font-bold">+5</button>
-                            <button onclick="app.applyScore(['${id}'], -1, '待改进')" class="p-2 border rounded hover:bg-red-50 text-red-700 font-bold">-1</button>
-                            <button onclick="app.deleteStudent('${id}')" class="p-2 border rounded hover:bg-gray-100 text-gray-500"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button>
+                        <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                            <div class="grid grid-cols-4 gap-2 mb-6">
+                                <button onclick="app.applyScore(['${id}'], 1, '表现不错')" class="py-2 rounded-lg border hover:bg-emerald-50 hover:border-emerald-300 font-bold text-emerald-700 transition-colors">+1</button>
+                                <button onclick="app.applyScore(['${id}'], 5, '巨大进步')" class="py-2 rounded-lg border hover:bg-emerald-50 hover:border-emerald-300 font-bold text-emerald-700 transition-colors">+5</button>
+                                <button onclick="app.applyScore(['${id}'], 10, '完美表现')" class="py-2 rounded-lg border hover:bg-emerald-50 hover:border-emerald-300 font-bold text-emerald-700 transition-colors">+10</button>
+                                <button onclick="app.applyScore(['${id}'], -5, '待改进')" class="py-2 rounded-lg border hover:bg-red-50 hover:border-red-300 font-bold text-red-700 transition-colors">-5</button>
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 mb-2 text-sm flex items-center gap-2">
+                                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-600"></i> 成长轨迹
+                            </h4>
+                            <div class="mb-6">
+                                ${chartSvg}
+                            </div>
+                            
+                            <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                <i data-lucide="history" class="w-4 h-4 text-gray-500"></i> ${t('history')}
+                            </h4>
+                            <div class="space-y-1">
+                                ${historyHtml || '<p class="text-gray-400 text-sm italic text-center py-4">暂无记录</p>'}
+                            </div>
                         </div>
                         
-                        <div class="flex gap-2 mb-6">
-                            <input type="text" id="custom-reason" placeholder="理由" class="flex-1 p-2 border rounded text-sm">
-                            <input type="number" id="custom-val" placeholder="+/-" class="w-20 p-2 border rounded text-sm">
-                            <button onclick="app.applyCustom('${id}')" class="px-4 bg-slate-800 text-white rounded hover:bg-slate-700">OK</button>
-                        </div>
-
-                        <h4 class="font-bold text-gray-800 mb-2 text-sm">History</h4>
-                        <div class="overflow-y-auto flex-1 text-sm space-y-2">
-                            ${student.history.slice(0, 8).map(h => `
-                                <div class="flex justify-between border-b pb-1">
-                                    <span class="text-gray-600">${h.reason || 'Bonus'}</span>
-                                    <span class="${h.scoreDelta > 0 ? 'text-emerald-600' : 'text-red-500'} font-bold">${h.scoreDelta > 0 ? '+' : ''}${h.scoreDelta}</span>
-                                </div>`).join('')}
+                        <div class="p-4 border-t bg-gray-50 flex justify-between items-center">
+                            <button onclick="app.deleteStudent('${id}')" class="text-red-400 hover:text-red-600 text-xs font-bold flex items-center gap-1 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i> ${t('removeStudent')}
+                            </button>
+                             <button onclick="app.showQR('${student.id}')" class="text-gray-400 hover:text-gray-600 text-xs font-bold flex items-center gap-1 transition-colors">
+                                <i data-lucide="qr-code" class="w-4 h-4"></i> 身份码
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -553,27 +646,36 @@ const app = {
         }
     },
 
-    // --- QR Code Modal ---
+// --- 修复：身份码弹窗 (彻底关闭逻辑) ---
     showQR: function (id) {
         const student = state.students.find(s => s.id === id);
-        // Generates a QR containing student data as JSON (or a URL if you host this)
+        // 生成二维码数据
         const qrData = `ClassTree Student Card\nName: ${student.name}\nScore: ${student.score}\nGroup: ${student.group}`;
 
+        // 防御性编程：如果已经有一个弹窗，先把它关掉
+        const existing = document.getElementById('qr-overlay');
+        if (existing) existing.remove();
+
         const html = `
-             <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4 backdrop-blur-md" onclick="if(event.target === this) document.getElementById('qr-modal').remove()">
-                <div id="qr-modal" class="bg-white rounded-2xl p-8 text-center animate-zoom-in max-w-xs w-full">
+             <div id="qr-overlay" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[60] p-4 backdrop-blur-md" 
+                onclick="if(event.target === this) document.getElementById('qr-overlay').remove()">
+                
+                <div class="bg-white rounded-2xl p-8 text-center animate-zoom-in max-w-xs w-full">
                     <h3 class="text-xl font-bold mb-4">${student.name}</h3>
                     <div id="qrcode" class="flex justify-center mb-4"></div>
                     <p class="text-sm text-gray-500">扫码查看当前成长值</p>
-                    <button onclick="document.getElementById('qr-modal').remove()" class="mt-6 text-gray-400 hover:text-gray-600">Close</button>
+                    
+                    <button onclick="document.getElementById('qr-overlay').remove()" class="mt-6 text-gray-400 hover:text-gray-600 text-sm">关闭 (Close)</button>
                 </div>
              </div>
         `;
+        
+        // 创建临时容器并追加到 body
         const div = document.createElement('div');
         div.innerHTML = html;
         document.body.appendChild(div);
 
-        // Use QRCode.js library
+        // 生成二维码
         new QRCode(document.getElementById("qrcode"), {
             text: qrData,
             width: 180,
@@ -583,19 +685,18 @@ const app = {
         });
     },
 
-    // --- Shop System (升级版：允许多次购买) ---
-    openShop: function () {
+    openShop: function() {
         if (state.selectedIds.size !== 1) {
             alert("请先选择一位学生进入商店");
             return;
         }
         const studentId = [...state.selectedIds][0];
         const student = state.students.find(s => s.id === studentId);
-
+        
         const itemsHtml = SHOP_ITEMS.map(item => {
             // 计算当前拥有的数量
             const ownCount = student.decorations ? student.decorations.filter(id => id === item.id).length : 0;
-
+            
             return `
                 <div class="border rounded-xl p-4 flex flex-col items-center gap-2 bg-white hover:border-emerald-400 transition-all">
                     <div class="relative w-12 h-12 rounded-full flex items-center justify-center text-white shadow-md" style="background:${item.color}">
@@ -622,7 +723,7 @@ const app = {
                         </div>
                         <button onclick="app.closeModal()"><i data-lucide="x" class="w-5 h-5 text-amber-800"></i></button>
                     </div>
-                    <div class="p-6 grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div class="p-6 grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
                         ${itemsHtml}
                     </div>
                 </div>
@@ -691,179 +792,7 @@ const app = {
         lucide.createIcons();
     },
 
-    save: function () {
-        localStorage.setItem('classTree_students', JSON.stringify(state.students));
-        localStorage.setItem('classTree_config', JSON.stringify(state.config));
-        this.renderGrid(); // Re-render grid to show updates
-        this.renderHeader(); // Update translations if language changed
-    },
 
-    renderHeader: function () {
-        // Translations for static header elements
-        document.getElementById('app-title').textContent = t('appTitle');
-        document.getElementById('search-input').placeholder = t('searchPlaceholder');
-        document.getElementById('lbl-manage').textContent = t('manage');
-        document.getElementById('lbl-selected').textContent = t('selected');
-        document.getElementById('lbl-clear').textContent = t('clear');
-    },
-
-    renderGrid: function () {
-        const container = document.getElementById('main-container');
-        container.innerHTML = '';
-
-        // Filter
-        const filtered = state.students.filter(s =>
-            s.name.toLowerCase().includes(state.searchQuery.toLowerCase())
-        );
-
-        if (filtered.length === 0) {
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-24 text-gray-400">
-                    <i data-lucide="sprout" class="w-16 h-16 mb-4 opacity-50"></i>
-                    <p class="text-xl font-medium">${t('noStudents')}</p>
-                    <button onclick="app.openManagerModal()" class="mt-4 text-emerald-600 hover:underline">${t('addSome')}</button>
-                </div>
-            `;
-            lucide.createIcons();
-            return;
-        }
-
-        let html = '';
-
-        if (state.viewMode === 'forest') {
-            // Group by Group
-            const groups = {};
-            filtered.forEach(s => {
-                const g = s.group || 'Unassigned';
-                if (!groups[g]) groups[g] = [];
-                groups[g].push(s);
-            });
-
-            html += `<div class="space-y-12">`;
-            for (const [groupName, groupStudents] of Object.entries(groups)) {
-                html += `
-                    <div class="bg-white/50 rounded-3xl p-6 border border-emerald-100/50">
-                        <h3 class="text-2xl font-bold text-emerald-800 mb-6 flex items-center gap-2">
-                            <span class="w-2 h-8 bg-emerald-400 rounded-full"></span> ${groupName}
-                        </h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                            ${groupStudents.map(s => this.createStudentCard(s)).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            html += `</div>`;
-        } else if (state.viewMode === 'seats') {
-            // Seats Grid
-            html = `
-                <div class="bg-white/40 border border-gray-200 rounded-xl p-8 overflow-x-auto">
-                     <div class="grid grid-cols-6 gap-4 min-w-[800px]">
-                         ${filtered.map(s => this.createStudentCard(s, true)).join('')}
-                     </div>
-                     <div class="mt-8 text-center text-gray-400 text-sm font-medium uppercase tracking-widest border-t border-gray-300 pt-2">
-                         Front of Class
-                     </div>
-                </div>
-            `;
-        } else {
-            // Default Grid
-            html = `<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
-                ${filtered.map(s => this.createStudentCard(s)).join('')}
-            </div>`;
-        }
-
-        container.innerHTML = html;
-        lucide.createIcons();
-        this.updateBatchBar();
-    },
-
-    createStudentCard: function (student, compact = false) {
-        const stage = getStage(student.score);
-        const isSelected = state.selectedIds.has(student.id);
-        const svg = generateTreeSVG(student.treeType, stage, state.config.treeStyle, student.decorations);
-        return `
-            <div 
-                onclick="app.toggleSelection('${student.id}')"
-                oncontextmenu="event.preventDefault(); app.toggleSelection('${student.id}')"
-                ondblclick="app.openStudentDetail('${student.id}')"
-                class="student-card group relative bg-white rounded-2xl p-4 cursor-pointer transition-all duration-300 flex flex-col justify-between
-                ${isSelected ? 'selected ring-4 ring-emerald-400 shadow-xl' : 'hover:shadow-xl hover:-translate-y-1 ring-1 ring-gray-100 hover:ring-emerald-200'}">
-                
-                <div class="absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors 
-                    ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-200 bg-white group-hover:border-emerald-300'}">
-                    ${isSelected ? '<div class="w-2 h-2 bg-white rounded-full"></div>' : ''}
-                </div>
-
-                <div class="mb-2 pt-2 flex justify-center tree-container ${compact ? 'w-16 h-20 mx-auto' : ''}">
-                    ${svg}
-                </div>
-
-                <div class="text-center">
-                    <h3 class="font-bold text-gray-800 truncate px-2 text-sm">${student.name}</h3>
-                    <div class="flex items-center justify-center gap-2 mt-1">
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${student.score < 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-700'}">
-                            ${student.score} ${t('points')}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    toggleSelection: function (id) {
-        if (state.selectedIds.has(id)) {
-            state.selectedIds.delete(id);
-        } else {
-            state.selectedIds.add(id);
-        }
-
-        // If selection exists, just re-render UI classes (simpler to full re-render for this demo)
-        this.renderGrid();
-    },
-
-    clearSelection: function () {
-        state.selectedIds.clear();
-        this.renderGrid();
-    },
-
-    updateBatchBar: function () {
-        const bar = document.getElementById('batch-bar');
-        const count = document.getElementById('batch-count');
-
-        if (state.selectedIds.size > 0) {
-            bar.classList.remove('hidden', 'opacity-0');
-            count.textContent = state.selectedIds.size;
-        } else {
-            bar.classList.add('opacity-0');
-            setTimeout(() => bar.classList.add('hidden'), 300);
-        }
-    },
-
-    batchScore: function (delta) {
-        if (state.selectedIds.size === 0) return;
-        this.applyScore([...state.selectedIds], delta, "Batch Action");
-        this.clearSelection();
-    },
-
-    applyScore: function (ids, delta, reason) {
-        const now = Date.now();
-        state.students = state.students.map(s => {
-            if (ids.includes(s.id)) {
-                return {
-                    ...s,
-                    score: s.score + delta,
-                    history: [{
-                        id: generateId(),
-                        timestamp: now,
-                        scoreDelta: delta,
-                        reason: reason
-                    }, ...s.history]
-                };
-            }
-            return s;
-        });
-        this.save();
-    },
 
     // --- Modal Logic ---
 
@@ -871,7 +800,134 @@ const app = {
         document.getElementById('modal-container').innerHTML = '';
     },
 
+    // --- 2. 成就系统检测引擎 ---
+    checkAchievements: function (student) {
+        if (!student.badges) student.badges = [];
+        const now = Date.now();
+        const earned = [];
 
+        // A. 🏆 积分破百
+        if (student.score >= 100 && !student.badges.includes('trophy')) {
+            student.badges.push('trophy');
+            earned.push(ACHIEVEMENTS['trophy']);
+        }
+
+        // B. 🔥 连续 3 天加分 (热火朝天)
+        if (!student.badges.includes('fire')) {
+            // 获取所有加分记录的时间戳
+            const dates = student.history
+                .filter(h => h.scoreDelta > 0)
+                .map(h => new Date(h.timestamp).setHours(0, 0, 0, 0));
+            const uniqueDates = [...new Set(dates)].sort((a, b) => b - a); // 倒序排列
+
+            // 检查最近3个日期是否连续
+            if (uniqueDates.length >= 3) {
+                const d1 = uniqueDates[0];
+                const d2 = uniqueDates[1];
+                const d3 = uniqueDates[2];
+                const day = 86400000;
+                if ((d1 - d2 === day) && (d2 - d3 === day)) {
+                    student.badges.push('fire');
+                    earned.push(ACHIEVEMENTS['fire']);
+                }
+            }
+        }
+
+        // C. 🛡️ 全勤卫士 (累计活跃5天)
+        if (!student.badges.includes('shield')) {
+            const uniqueDays = new Set(student.history.map(h => new Date(h.timestamp).setHours(0, 0, 0, 0))).size;
+            if (uniqueDays >= 5) {
+                student.badges.push('shield');
+                earned.push(ACHIEVEMENTS['shield']);
+            }
+        }
+
+        // 播报奖励
+        if (earned.length > 0) {
+            alert(`🎉 恭喜 ${student.name} 解锁成就：\n${earned.map(e => `${e.icon} ${e.name}`).join('\n')}`);
+            this.save();
+        }
+    },
+
+    // --- 3. 生成成长曲线图 (SVG) ---
+    generateGrowthChart: function (student) {
+        const history = student.history.sort((a, b) => a.timestamp - b.timestamp);
+        // 如果数据太少，无法画图
+        if (history.length < 2) return `<div class="h-32 flex items-center justify-center text-gray-400 text-xs">数据积累中...</div>`;
+
+        // 重构积分时间轴
+        let dataPoints = [];
+        let currentScore = 0; // 初始分
+
+        // 简易处理：按记录顺序模拟积分变化
+        dataPoints.push({ idx: 0, score: 0 });
+        history.forEach((h, i) => {
+            currentScore += h.scoreDelta;
+            dataPoints.push({ idx: i + 1, score: currentScore });
+        });
+
+        // 截取最近 10 次变化
+        dataPoints = dataPoints.slice(-10);
+
+        // 计算 SVG 坐标
+        const width = 280, height = 100;
+        const padding = 10;
+        const maxScore = Math.max(...dataPoints.map(d => d.score), 10);
+        const minScore = Math.min(0, ...dataPoints.map(d => d.score));
+        const range = maxScore - minScore || 1;
+
+        const getX = (i) => padding + (i / (dataPoints.length - 1)) * (width - 2 * padding);
+        const getY = (s) => height - padding - ((s - minScore) / range) * (height - 2 * padding);
+
+        let pathD = `M ${getX(0)} ${getY(dataPoints[0].score)}`;
+        dataPoints.forEach((d, i) => { if (i > 0) pathD += ` L ${getX(i)} ${getY(d.score)}`; });
+
+        return `
+            <svg width="100%" height="120" viewBox="0 0 ${width} ${height}" class="bg-white rounded border border-gray-100 mt-2">
+                <line x1="${padding}" y1="${getY(0)}" x2="${width - padding}" y2="${getY(0)}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="4"/>
+                <path d="${pathD}" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="chart-line"/>
+                ${dataPoints.map((d, i) => `<circle cx="${getX(i)}" cy="${getY(d.score)}" r="3" fill="#059669" />`).join('')}
+            </svg>
+            <div class="text-[10px] text-center text-gray-400 mt-1">近 ${dataPoints.length} 次积分变动趋势</div>
+        `;
+    },
+
+    // --- 4. 数据备份与恢复 ---
+    exportData: function () {
+        const data = JSON.stringify({ students: state.students, config: state.config });
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ClassTree_Backup_${new Date().toLocaleDateString()}.json`;
+        a.click();
+    },
+
+    importData: function () {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = e => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = event => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.students && data.config) {
+                        state.students = data.students;
+                        state.config = data.config;
+                        this.save();
+                        this.openManagerModal();
+                        alert("数据恢复成功！");
+                    } else {
+                        alert("文件格式不正确");
+                    }
+                } catch (err) { alert("读取文件失败"); }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    },
 
     changeTreeType: function (id, type) {
         state.students = state.students.map(s => s.id === id ? { ...s, treeType: type } : s);
@@ -912,6 +968,9 @@ const app = {
                 </div>
             `).join('');
 
+
+            
+
             return `
                 <div class="space-y-4 animate-fade-in h-full overflow-y-auto custom-scrollbar pr-2">
                     
@@ -949,6 +1008,26 @@ const app = {
                         <input type="text" id="add-name" placeholder="新学生姓名" class="flex-1 p-2 border rounded-lg text-sm outline-none focus:border-emerald-500 bg-white">
                         <input type="text" id="add-group" placeholder="小组 (可选)" class="flex-1 p-2 border rounded-lg text-sm outline-none focus:border-emerald-500 bg-white">
                         <button onclick="app.addStudentSimple()" class="px-4 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 font-bold text-sm shadow-sm whitespace-nowrap">+ 添加</button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">物理特性 (Physics)</label>
+                        <label class="flex items-center gap-2 cursor-pointer bg-white p-2 border rounded-lg">
+                            <input type="checkbox" onchange="app.updateConfig('gravityMode', this.checked); app.renderGrid();" ${state.config.gravityMode ? 'checked' : ''}>
+                            <span class="text-sm">重力模式 (Gravity)</span>
+                        </label>
+                    </div>
+
+                    <div class="col-span-full pt-2 mt-2 border-t border-dashed">
+                        <label class="block text-xs font-bold text-gray-500 mb-2">数据安全 (Data Backup)</label>
+                        <div class="flex gap-4">
+                            <button onclick="app.exportData()" class="flex-1 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-100 text-xs font-bold flex items-center justify-center gap-2">
+                                <i data-lucide="download"></i> 导出备份 (.json)
+                            </button>
+                            <button onclick="app.importData()" class="flex-1 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 text-xs font-bold flex items-center justify-center gap-2">
+                                <i data-lucide="upload"></i> 恢复数据
+                            </button>
+                        </div>
                     </div>
 
                     <div class="flex justify-between items-end mt-2">
@@ -1310,36 +1389,74 @@ const app = {
         }
     },
 
-    // --- Leaderboard Modal ---
-    openLeaderboard: function () {
-        const sorted = [...state.students].sort((a, b) => b.score - a.score).slice(0, 5);
+    openLeaderboard: function() {
+        // 1. 计算小组数据
+        const groupStats = {};
+        state.students.forEach(s => {
+            const g = s.group || '未分组';
+            if (!groupStats[g]) groupStats[g] = { name: g, total: 0, count: 0 };
+            groupStats[g].total += s.score;
+            groupStats[g].count++;
+        });
+        const groups = Object.values(groupStats).sort((a,b) => (b.total/b.count) - (a.total/a.count));
 
-        // Simple HTML Bar Chart
-        const maxScore = sorted[0] ? sorted[0].score : 1;
-        const chartHtml = sorted.map((s, i) => {
-            const pct = Math.max(5, (s.score / maxScore) * 100);
+        // 2. 生成小组榜 HTML
+        const groupHtml = groups.map((g, i) => {
+            const avg = g.count > 0 ? (g.total / g.count).toFixed(1) : 0;
+            const width = Math.min(100, (avg / 20) * 100); 
             return `
-                <div class="mb-3">
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="font-bold text-gray-700">#${i + 1} ${s.name}</span>
-                        <span class="font-bold text-emerald-600">${s.score}</span>
+                <div class="mb-4">
+                    <div class="flex justify-between items-end mb-1">
+                        <span class="font-bold text-gray-700 flex items-center gap-2">
+                            <span class="text-xs bg-gray-200 px-1.5 rounded text-gray-500">#${i+1}</span> ${g.name}
+                        </span>
+                        <div class="text-right">
+                            <span class="text-2xl font-black text-indigo-600 italic font-mono">${avg}</span>
+                            <span class="text-[10px] text-gray-400">平均分 (总 ${g.total})</span>
+                        </div>
                     </div>
-                    <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
-                        <div class="h-full bg-emerald-500" style="width: ${pct}%"></div>
+                    <div class="h-2 bg-gray-100 rounded-full overflow-hidden flex">
+                        <div class="h-full bg-indigo-500 relative" style="width: ${width}%"></div>
                     </div>
                 </div>
             `;
         }).join('');
 
+        // 3. 生成个人榜 HTML
+        const sorted = [...state.students].sort((a,b) => b.score - a.score).slice(0, 5);
+        const topStudentHtml = sorted.map((s,i) => `
+             <div class="flex justify-between items-center py-3 border-b border-dashed border-gray-200 last:border-0 hover:bg-gray-50 px-2 rounded transition-colors">
+                <span class="flex items-center gap-2">
+                    <span class="w-6 h-6 flex items-center justify-center rounded-full ${i===0?'bg-yellow-100 text-yellow-600':(i===1?'bg-gray-100 text-gray-600':'bg-orange-50 text-orange-600')} text-xs font-bold">#${i+1}</span>
+                    <span class="font-bold text-gray-700">${s.name}</span>
+                </span>
+                <span class="font-mono font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">${s.score}</span>
+            </div>
+        `).join('');
+
+        // 4. 组装弹窗 (修复了 class 缺失的问题)
         const html = `
-            <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in" onclick="if(event.target === this) app.closeModal()">
-                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-zoom-in">
-                    <div class="p-6 border-b flex justify-between items-center bg-yellow-50">
-                        <h2 class="text-2xl font-bold text-yellow-700 flex items-center gap-2"><i data-lucide="trophy" class="w-6 h-6"></i> ${t('topStudents')}</h2>
-                        <button onclick="app.closeModal()" class="p-1"><i data-lucide="x" class="w-5 h-5 text-gray-400"></i></button>
+            <div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm animate-fade-in" onclick="if(event.target === this) app.closeModal()">
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden animate-zoom-in flex flex-col max-h-[90vh]">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 text-white flex justify-between items-center shrink-0">
+                         <h2 class="text-2xl font-bold flex items-center gap-2"><i data-lucide="trophy" class="w-6 h-6"></i> 荣耀排行榜</h2>
+                         <button onclick="app.closeModal()" class="text-white/80 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
                     </div>
-                    <div class="p-6">
-                        ${state.students.length === 0 ? '<p class="text-center text-gray-400">No data</p>' : chartHtml}
+                    <div class="p-0 grid grid-cols-1 md:grid-cols-2 h-full overflow-hidden">
+                        <div class="p-6 bg-gray-50 overflow-y-auto custom-scrollbar border-b md:border-b-0 md:border-r border-gray-200">
+                            <h3 class="font-bold text-indigo-900 mb-6 uppercase tracking-widest text-sm flex items-center gap-2">
+                                <i data-lucide="swords" class="w-4 h-4"></i> 小组 PK (Group Battle)
+                            </h3>
+                            ${groups.length > 0 ? groupHtml : '<p class="text-gray-400 text-sm">暂无小组数据</p>'}
+                        </div>
+                        <div class="p-6 bg-white overflow-y-auto custom-scrollbar">
+                            <h3 class="font-bold text-amber-600 mb-6 uppercase tracking-widest text-sm flex items-center gap-2">
+                                <i data-lucide="crown" class="w-4 h-4"></i> 个人英雄 (Top Students)
+                            </h3>
+                            <div class="space-y-1">
+                                ${topStudentHtml}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

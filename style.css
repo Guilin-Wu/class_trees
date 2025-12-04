@@ -56,3 +56,29 @@
     box-shadow: 0 0 0 4px #34d399, 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     transform: scale(0.98);
 }
+
+/* --- 新增：物理重力模式动画 (简谐振动) --- */
+@keyframes sway {
+    0% { transform: rotate(0deg); }
+    20% { transform: rotate(6deg); }
+    40% { transform: rotate(-4deg); }
+    60% { transform: rotate(2deg); }
+    80% { transform: rotate(-1deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.gravity-mode:hover .tree-shaker {  /* 👈 改这里 */
+    transform-origin: 100px 190px;
+    animation: sway 1.5s ease-in-out infinite;
+}
+
+/* --- 图表样式 --- */
+.chart-line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 1.5s ease-out forwards;
+}
+
+@keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+}

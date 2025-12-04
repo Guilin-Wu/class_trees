@@ -61,6 +61,22 @@
         <button onclick="app.clearSelection()" class="text-gray-400 hover:text-gray-600 text-sm font-medium" id="lbl-clear">取消</button>
     </div>
 
+    <div id="batch-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/90 backdrop-blur shadow-2xl border border-gray-200 p-2 px-6 rounded-full flex items-center gap-4 hidden opacity-0 transition-all duration-300 transform translate-y-0">
+        <span class="font-bold text-gray-700 whitespace-nowrap text-sm"><span id="batch-count" class="text-emerald-600 font-black">0</span> 已选</span>
+        <div class="h-4 w-px bg-gray-300 mx-1"></div>
+        
+        <button onclick="app.batchScore(1)" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200 transition-colors flex items-center justify-center">+1</button>
+        <button onclick="app.batchScore(5)" class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 font-bold hover:bg-emerald-200 transition-colors flex items-center justify-center">+5</button>
+        
+        <div class="h-4 w-px bg-gray-300 mx-1"></div>
+        
+        <input type="number" id="batch-custom-score" placeholder="+/-" class="w-16 p-1 text-sm border border-gray-200 rounded text-center outline-none focus:border-emerald-500 bg-gray-50">
+        <button onclick="app.batchCustomScore()" class="text-xs bg-slate-800 text-white px-3 py-1.5 rounded-full hover:bg-slate-700 font-bold">OK</button>
+        
+        <div class="h-4 w-px bg-gray-300 mx-1"></div>
+        <button onclick="app.clearSelection()" class="text-gray-400 hover:text-red-500 text-xs font-bold flex items-center gap-1"><i data-lucide="x" class="w-3 h-3"></i></button>
+    </div>
+
     <div id="modal-container"></div>
 
     <script src="script.js"></script>
