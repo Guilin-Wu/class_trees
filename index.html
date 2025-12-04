@@ -4,16 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ClassTree - 班级小树成长系统</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Custom CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans selection:bg-emerald-200">
 
-    <!-- Header -->
     <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -25,7 +22,6 @@
                 </h1>
             </div>
 
-            <!-- Search & View Mode -->
             <div class="flex items-center gap-4 flex-1 max-w-2xl mx-4 lg:mx-8">
                 <div class="relative flex-1 group">
                     <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
@@ -38,10 +34,10 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="flex items-center gap-2">
+                <button id="btn-shop" class="p-2 text-amber-500 hover:bg-amber-100 rounded-lg transition-colors" title="兑换商店"><i data-lucide="store" class="w-5 h-5"></i></button>
                 <button id="btn-lucky" class="p-2 text-purple-500 hover:bg-purple-100 rounded-lg transition-colors"><i data-lucide="dice-5" class="w-5 h-5"></i></button>
-                <button id="btn-daily" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i></button>
+                <button id="btn-daily" class="p-2 text-blue-500 hover:bg-blue-100 rounded-lg transition-colors"><i data-lucide="calendar" class="w-5 h-5"></i></button>
                 <button id="btn-stats" class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"><i data-lucide="trophy" class="w-5 h-5"></i></button>
                 <button id="btn-manage" class="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-full text-sm font-medium hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200">
                     <i data-lucide="settings" class="w-4 h-4"></i> <span class="hidden sm:inline" id="lbl-manage">管理</span>
@@ -50,26 +46,23 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main id="main-container" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-4rem)]">
-        <!-- Student grid will be injected here -->
-    </main>
+        </main>
 
-    <!-- Floating Batch Action Bar -->
     <div id="batch-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white rounded-full shadow-2xl border border-gray-200 p-2 px-6 flex items-center gap-4 hidden opacity-0 transition-opacity duration-300">
         <span class="font-bold text-gray-700 whitespace-nowrap"><span id="batch-count">0</span> <span id="lbl-selected">已选</span></span>
         <div class="h-6 w-px bg-gray-300 mx-2"></div>
         <button onclick="app.batchScore(1)" class="p-2 hover:bg-emerald-50 text-emerald-600 rounded-full font-bold flex items-center gap-1">+1</button>
         <button onclick="app.batchScore(5)" class="p-2 hover:bg-emerald-50 text-emerald-600 rounded-full font-bold flex items-center gap-1">+5</button>
-        <button onclick="app.batchScore(-1)" class="p-2 hover:bg-red-50 text-red-500 rounded-full font-bold flex items-center gap-1">-1</button>
+        <div class="h-6 w-px bg-gray-300 mx-2"></div>
+        <input type="number" id="batch-custom-score" placeholder="自定义" class="w-20 p-1 text-sm border rounded text-center">
+        <button onclick="app.batchCustomScore()" class="text-sm bg-slate-800 text-white px-3 py-1 rounded-full">OK</button>
         <div class="h-6 w-px bg-gray-300 mx-2"></div>
         <button onclick="app.clearSelection()" class="text-gray-400 hover:text-gray-600 text-sm font-medium" id="lbl-clear">取消</button>
     </div>
 
-    <!-- Modals Container -->
     <div id="modal-container"></div>
 
-    <!-- Main Logic -->
     <script src="script.js"></script>
 </body>
 </html>
